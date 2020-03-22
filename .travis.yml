@@ -1,11 +1,12 @@
 language: go
 
 go:
-  - 1.12
+  - 1.13
+  - 1.14
   - tip
 
 env:
-- GO111MODULE=on
+  - GO111MODULE=on
 
 before_install:
   - go get github.com/axw/gocov/gocov
@@ -20,4 +21,4 @@ script:
   - go test -v -race ./...
 
 after_success:
-  - test "$TRAVIS_GO_VERSION" = "1.12" && goveralls -service=travis-ci
+  - test "$TRAVIS_GO_VERSION" = "1.14" && goveralls -service=travis-ci
