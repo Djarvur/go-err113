@@ -14,7 +14,7 @@ func inspectComparision(pass *analysis.Pass, n ast.Node) bool {
 		return true
 	}
 
-	// check if it is a comparision operation
+	// check if it is a comparison operation
 	if be.Op != token.EQL && be.Op != token.NEQ {
 		return true
 	}
