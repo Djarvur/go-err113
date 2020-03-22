@@ -1,3 +1,4 @@
+// Package err113 implements the checks
 package err113
 
 import (
@@ -10,6 +11,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
+// NewAnalyzer creates a new analysis.Analyzer instance tuned to run err113 checks
 func NewAnalyzer() *analysis.Analyzer {
 	return &analysis.Analyzer{
 		Name: "err113",
@@ -20,55 +22,18 @@ func NewAnalyzer() *analysis.Analyzer {
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	for _, file := range pass.Files {
-		ast.Inspect(file, func(n ast.Node) bool {
-			// check whether the call expression matches time.Now().Sub()
-			be, ok := n.(*ast.BinaryExpr)
-			if !ok {
-				return true
-			}
-
-			if be.Op != token.ADD {
-				return true
-			}
-
-			if _, ok := be.X.(*ast.BasicLit); !ok {
-				return true
-			}
-
-			if _, ok := be.Y.(*ast.BasicLit); !ok {
-				return true
-			}
-
-			isInteger := func(expr ast.Expr) bool {
-				t := pass.TypesInfo.TypeOf(expr)
-				if t == nil {
-					return false
-				}
-
-				bt, ok := t.Underlying().(*types.Basic)
-				if !ok {
-					return false
-				}
-
-				if (bt.Info() & types.IsInteger) == 0 {
-					return false
-				}
-
-				return true
-			}
-
-			// check that both left and right hand side are integers
-			if !isInteger(be.X) || !isInteger(be.Y) {
-				return true
-			}
-
-			pass.Reportf(be.Pos(), "integer addition found %q",
-				render(pass.Fset, be))
-			return true
-		})
+		ast.Inspect(file, func(n ast.Node) bool { return inspectComparision(pass, n) })
 	}
 
 	return nil, nil
+}
+
+func isError(v ast.Expr, info *types.Info) bool {
+	if intf, ok := info.TypeOf(v).Underlying().(*types.Interface); ok {
+		return intf.NumMethods() == 1 && intf.Method(0).FullName() == "(error).Error"
+	}
+
+	return false
 }
 
 // render returns the pretty-print of the given node
@@ -77,5 +42,6 @@ func render(fset *token.FileSet, x interface{}) string {
 	if err := printer.Fprint(&buf, fset, x); err != nil {
 		panic(err)
 	}
+
 	return buf.String()
 }
