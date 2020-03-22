@@ -14,7 +14,13 @@ func inspectComparision(pass *analysis.Pass, n ast.Node) bool {
 		return true
 	}
 
+	// check if it is a comparision operation
 	if be.Op != token.EQL && be.Op != token.NEQ {
+		return true
+	}
+
+	// check that both left and right hand side are not nil
+	if pass.TypesInfo.Types[be.X].IsNil() || pass.TypesInfo.Types[be.Y].IsNil() {
 		return true
 	}
 
