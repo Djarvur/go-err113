@@ -3,11 +3,12 @@ package err113
 import (
 	"go/ast"
 	"go/token"
+	"go/types"
 
 	"golang.org/x/tools/go/analysis"
 )
 
-func inspectComparision(pass *analysis.Pass, n ast.Node) bool {
+func inspectComparision(pass *analysis.Pass, n ast.Node) bool { // nolint: unparam
 	// check whether the call expression matches time.Now().Sub()
 	be, ok := n.(*ast.BinaryExpr)
 	if !ok {
@@ -36,4 +37,12 @@ func inspectComparision(pass *analysis.Pass, n ast.Node) bool {
 	)
 
 	return true
+}
+
+func isError(v ast.Expr, info *types.Info) bool {
+	if intf, ok := info.TypeOf(v).Underlying().(*types.Interface); ok {
+		return intf.NumMethods() == 1 && intf.Method(0).FullName() == "(error).Error"
+	}
+
+	return false
 }

@@ -22,18 +22,17 @@ func NewAnalyzer() *analysis.Analyzer {
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	for _, file := range pass.Files {
-		ast.Inspect(file, func(n ast.Node) bool { return inspectComparision(pass, n) })
+		tlds := enumerateFileDecls(file, pass.TypesInfo)
+		ast.Inspect(
+			file,
+			func(n ast.Node) bool {
+				return inspectComparision(pass, n) &&
+					inspectDefinition(pass, tlds, n)
+			},
+		)
 	}
 
 	return nil, nil
-}
-
-func isError(v ast.Expr, info *types.Info) bool {
-	if intf, ok := info.TypeOf(v).Underlying().(*types.Interface); ok {
-		return intf.NumMethods() == 1 && intf.Method(0).FullName() == "(error).Error"
-	}
-
-	return false
 }
 
 // render returns the pretty-print of the given node
@@ -44,4 +43,26 @@ func render(fset *token.FileSet, x interface{}) string {
 	}
 
 	return buf.String()
+}
+
+func enumerateFileDecls(f *ast.File, info *types.Info) map[*ast.CallExpr]struct{} {
+	res := make(map[*ast.CallExpr]struct{})
+
+	for _, d := range f.Decls {
+		if td, ok := d.(*ast.GenDecl); ok {
+			if td.Tok == token.VAR {
+				for _, s := range td.Specs {
+					if vs, ok := s.(*ast.ValueSpec); ok {
+						for _, v := range vs.Values {
+							if ce, ok := v.(*ast.CallExpr); ok {
+								res[ce] = struct{}{}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return res
 }
