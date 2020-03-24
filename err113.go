@@ -48,19 +48,41 @@ func render(fset *token.FileSet, x interface{}) string {
 func enumerateFileDecls(f *ast.File) map[*ast.CallExpr]struct{} {
 	res := make(map[*ast.CallExpr]struct{})
 
+	var ces []*ast.CallExpr // nolint: prealloc
+
 	for _, d := range f.Decls {
-		if td, ok := d.(*ast.GenDecl); ok {
-			if td.Tok == token.VAR {
-				for _, s := range td.Specs {
-					if vs, ok := s.(*ast.ValueSpec); ok {
-						for _, v := range vs.Values {
-							if ce, ok := v.(*ast.CallExpr); ok {
-								res[ce] = struct{}{}
-							}
-						}
-					}
-				}
-			}
+		ces = append(ces, enumerateDeclVars(d)...)
+	}
+
+	for _, ce := range ces {
+		res[ce] = struct{}{}
+	}
+
+	return res
+}
+
+func enumerateDeclVars(d ast.Decl) (res []*ast.CallExpr) {
+	td, ok := d.(*ast.GenDecl)
+	if !ok || td.Tok != token.VAR {
+		return nil
+	}
+
+	for _, s := range td.Specs {
+		res = append(res, enumerateSpecValues(s)...)
+	}
+
+	return res
+}
+
+func enumerateSpecValues(s ast.Spec) (res []*ast.CallExpr) {
+	vs, ok := s.(*ast.ValueSpec)
+	if !ok {
+		return nil
+	}
+
+	for _, v := range vs.Values {
+		if ce, ok := v.(*ast.CallExpr); ok {
+			res = append(res, ce)
 		}
 	}
 

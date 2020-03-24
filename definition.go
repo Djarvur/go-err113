@@ -21,7 +21,7 @@ func checkWrap(ce *ast.CallExpr, info *types.Info) bool {
 	return !(len(ce.Args) > 0 && strings.Contains(toString(ce.Args[0], info), `%w`))
 }
 
-func inspectDefinition(pass *analysis.Pass, tlds map[*ast.CallExpr]struct{}, n ast.Node) bool { //nolint: unparam,gocyclo
+func inspectDefinition(pass *analysis.Pass, tlds map[*ast.CallExpr]struct{}, n ast.Node) bool { //nolint: unparam
 	// check whether the call expression matches time.Now().Sub()
 	ce, ok := n.(*ast.CallExpr)
 	if !ok {
@@ -37,29 +37,30 @@ func inspectDefinition(pass *analysis.Pass, tlds map[*ast.CallExpr]struct{}, n a
 		return true
 	}
 
-	fx, ok := fn.X.(*ast.Ident)
+	fxName, ok := asImportedName(fn.X, pass.TypesInfo)
 	if !ok {
 		return true
 	}
 
-	fp, ok := pass.TypesInfo.ObjectOf(fx).(*types.PkgName)
+	methods, ok := methods2check[fxName]
 	if !ok {
 		return true
 	}
 
-	fxName := fp.Imported().Name()
-
-	if p, ok := methods2check[fxName]; ok {
-		if m, ok := p[fn.Sel.Name]; ok {
-			if m(ce, pass.TypesInfo) {
-				pass.Reportf(
-					ce.Pos(),
-					"do not define dynamic errors, use wrapped static errors instead: %q",
-					render(pass.Fset, ce),
-				)
-			}
-		}
+	checkFunc, ok := methods[fn.Sel.Name]
+	if !ok {
+		return true
 	}
+
+	if !checkFunc(ce, pass.TypesInfo) {
+		return true
+	}
+
+	pass.Reportf(
+		ce.Pos(),
+		"do not define dynamic errors, use wrapped static errors instead: %q",
+		render(pass.Fset, ce),
+	)
 
 	return true
 }

@@ -25,6 +25,11 @@ func inspectComparision(pass *analysis.Pass, n ast.Node) bool { // nolint: unpar
 		return true
 	}
 
+	// check that both left and right hand side are not io.EOF
+	if isEOF(be.X, pass.TypesInfo) || isEOF(be.Y, pass.TypesInfo) {
+		return true
+	}
+
 	// check that both left and right hand side are errors
 	if !isError(be.X, pass.TypesInfo) && !isError(be.Y, pass.TypesInfo) {
 		return true
@@ -45,4 +50,31 @@ func isError(v ast.Expr, info *types.Info) bool {
 	}
 
 	return false
+}
+
+func isEOF(ex ast.Expr, info *types.Info) bool {
+	se, ok := ex.(*ast.SelectorExpr)
+	if !ok || se.Sel.Name != "EOF" {
+		return false
+	}
+
+	if ep, ok := asImportedName(se.X, info); !ok || ep != "io" {
+		return false
+	}
+
+	return true
+}
+
+func asImportedName(ex ast.Expr, info *types.Info) (string, bool) {
+	ei, ok := ex.(*ast.Ident)
+	if !ok {
+		return "", false
+	}
+
+	ep, ok := info.ObjectOf(ei).(*types.PkgName)
+	if !ok {
+		return "", false
+	}
+
+	return ep.Imported().Name(), true
 }
