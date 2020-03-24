@@ -1,6 +1,7 @@
 = err113 image:https://godoc.org/github.com/Djarvur/go-err113?status.svg["GoDoc",link="http://godoc.org/github.com/Djarvur/go-err113"] image:https://travis-ci.org/Djarvur/go-err113.svg["Build Status",link="https://travis-ci.org/Djarvur/go-err113"] image:https://coveralls.io/repos/Djarvur/go-err113/badge.svg?branch=master&service=github["Coverage Status",link="https://coveralls.io/github/Djarvur/go-err113?branch=master"]
 Daniel Podolsky
 :toc:
+
 Golang linter to check the errors handling expressions
 
 == Details
