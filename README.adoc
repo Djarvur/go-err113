@@ -20,9 +20,9 @@ This linter is checking the code for these 2 rules compliance.
 
 So, `err113` reports every `==` and `!=` comparison for exact `error` type variables except comparison to `nil`.
 
-Also, any call of `errors.New()` and `fmt.Errorf()` methods are reported except the calls used to initialise package-level variables. Also, the `fmt.Errorf()` calls wrapping the other errors are not reported.
+Also, any call of `errors.New()` and `fmt.Errorf()` methods are reported except the calls used to initialise package-level variables and the `fmt.Errorf()` calls wrapping the other errors.
 
-Note: non-standard packages, like `github.com/pkg/errors` are ignored.
+Note: non-standard packages, like `github.com/pkg/errors` are ignored complitely.
 
 == Install
 
