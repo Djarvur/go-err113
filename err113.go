@@ -6,7 +6,6 @@ import (
 	"go/ast"
 	"go/printer"
 	"go/token"
-	"go/types"
 
 	"golang.org/x/tools/go/analysis"
 )
@@ -22,7 +21,8 @@ func NewAnalyzer() *analysis.Analyzer {
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	for _, file := range pass.Files {
-		tlds := enumerateFileDecls(file, pass.TypesInfo)
+		tlds := enumerateFileDecls(file)
+
 		ast.Inspect(
 			file,
 			func(n ast.Node) bool {
@@ -45,7 +45,7 @@ func render(fset *token.FileSet, x interface{}) string {
 	return buf.String()
 }
 
-func enumerateFileDecls(f *ast.File, info *types.Info) map[*ast.CallExpr]struct{} {
+func enumerateFileDecls(f *ast.File) map[*ast.CallExpr]struct{} {
 	res := make(map[*ast.CallExpr]struct{})
 
 	for _, d := range f.Decls {

@@ -8,6 +8,19 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
+var methods2check = map[string]map[string]func(*ast.CallExpr, *types.Info) bool{ // nolint: gochecknoglobals
+	"errors": {"New": justTrue},
+	"fmt":    {"Errorf": checkWrap},
+}
+
+func justTrue(*ast.CallExpr, *types.Info) bool {
+	return true
+}
+
+func checkWrap(ce *ast.CallExpr, info *types.Info) bool {
+	return !(len(ce.Args) > 0 && strings.Contains(toString(ce.Args[0], info), `%w`))
+}
+
 func inspectDefinition(pass *analysis.Pass, tlds map[*ast.CallExpr]struct{}, n ast.Node) bool { //nolint: unparam,gocyclo
 	// check whether the call expression matches time.Now().Sub()
 	ce, ok := n.(*ast.CallExpr)
@@ -15,7 +28,7 @@ func inspectDefinition(pass *analysis.Pass, tlds map[*ast.CallExpr]struct{}, n a
 		return true
 	}
 
-	if _, ok := tlds[ce]; ok {
+	if _, ok = tlds[ce]; ok {
 		return true
 	}
 
@@ -36,20 +49,17 @@ func inspectDefinition(pass *analysis.Pass, tlds map[*ast.CallExpr]struct{}, n a
 
 	fxName := fp.Imported().Name()
 
-	if !(fxName == "errors" && fn.Sel.Name == "New") &&
-		!(fxName == "fmt" && fn.Sel.Name == "Errorf") {
-		return true
+	if p, ok := methods2check[fxName]; ok {
+		if m, ok := p[fn.Sel.Name]; ok {
+			if m(ce, pass.TypesInfo) {
+				pass.Reportf(
+					ce.Pos(),
+					"do not define dynamic errors, use wrapped static errors instead: %q",
+					render(pass.Fset, ce),
+				)
+			}
+		}
 	}
-
-	if fxName == "fmt" && fn.Sel.Name == "Errorf" && len(ce.Args) > 0 && strings.Contains(toString(ce.Args[0], pass.TypesInfo), `%w`) {
-		return true
-	}
-
-	pass.Reportf(
-		ce.Pos(),
-		"do not define dynamic errors, use wrapped static errors instead: %q",
-		render(pass.Fset, ce),
-	)
 
 	return true
 }

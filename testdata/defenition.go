@@ -18,6 +18,7 @@ var ErrWellDefined3 = fmt.Errorf("well defined 3 %d: %w", 3, ErrWellDefined1)
 var ErrWellDefined4, ErrWellDefined5 = errors.New("well defined 4"), errors.New("well defined 5")
 
 func DefineWell1() error {
+	_ = time.Now().Add(time.Second)
 	err := fmt.Errorf("well defined 1 %d: %w", 11, ErrWellDefined1)
 	return err
 }
