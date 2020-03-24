@@ -19,7 +19,7 @@ This linter is checking the code for these 2 rules compliance.
 
 === Reports
 
-So, `err113` reports every `==` and `!=` comparison for exact `error` type variables except comparison to `nil`.
+So, `err113` reports every `==` and `!=` comparison for exact `error` type variables except comparison to `nil` and `io.EOF`.
 
 Also, any call of `errors.New()` and `fmt.Errorf()` methods are reported except the calls used to initialise package-level variables and the `fmt.Errorf()` calls wrapping the other errors.
 
