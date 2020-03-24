@@ -1,4 +1,4 @@
-// Package err113 implements the checks
+// Package err113 is a Golang linter to check the errors handling expressions
 package err113
 
 import (
