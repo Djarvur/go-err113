@@ -1,6 +1,7 @@
 package err113
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
@@ -35,10 +36,32 @@ func inspectComparision(pass *analysis.Pass, n ast.Node) bool { // nolint: unpar
 		return true
 	}
 
-	pass.Reportf(
-		be.Pos(),
-		"do not compare errors directly, use errors.Is() instead: %q",
-		render(pass.Fset, be),
+	oldExpr := render(pass.Fset, be)
+
+	negate := ""
+	if be.Op == token.NEQ {
+		negate = "!"
+	}
+
+	newExpr := fmt.Sprintf("%s%s.Is(%s, %s)", negate, "errors", be.X, be.Y)
+
+	pass.Report(
+		analysis.Diagnostic{
+			Pos:     be.Pos(),
+			Message: fmt.Sprintf("do not compare errors directly, use errors.Is() instead: %q", oldExpr),
+			SuggestedFixes: []analysis.SuggestedFix{
+				{
+					Message: fmt.Sprintf("should replace %q with %q", oldExpr, newExpr),
+					TextEdits: []analysis.TextEdit{
+						{
+							Pos:     be.Pos(),
+							End:     be.End(),
+							NewText: []byte(newExpr),
+						},
+					},
+				},
+			},
+		},
 	)
 
 	return true
