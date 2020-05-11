@@ -71,4 +71,5 @@ Flags:
 == Thanks
 
 To link:https://github.com/quasilyte[Iskander (Alex) Sharipov] for the really useful advices.
-TO link:https://github.com/jackwhelpton[Jack Whelpton] for the bugfix provided.
+
+To link:https://github.com/jackwhelpton[Jack Whelpton] for the bugfix provided.
