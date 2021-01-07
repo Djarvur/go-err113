@@ -33,6 +33,10 @@ func DefineWell3() error {
 	return fmt.Errorf(errWellTemplate3, 13, ErrWellDefined1)
 }
 
+func DefineWell4() error {
+	return fmt.Errorf("well defined 14 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx %d: %w", 14, ErrWellDefined1)
+}
+
 func DefineBad1() error {
 	err := fmt.Errorf("bad defined 21 %d", 21) // want `do not define dynamic errors, use wrapped static errors instead: `
 	return err
