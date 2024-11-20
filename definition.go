@@ -8,7 +8,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-var methods2check = map[string]map[string]func(*ast.CallExpr, *types.Info) bool{ // nolint: gochecknoglobals
+var methods2check = map[string]map[string]func(*ast.CallExpr, *types.Info) bool{ //nolint:gochecknoglobals
 	"errors": {"New": justTrue},
 	"fmt":    {"Errorf": checkWrap},
 }

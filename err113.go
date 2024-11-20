@@ -48,7 +48,7 @@ func render(fset *token.FileSet, x interface{}) string {
 func enumerateFileDecls(f *ast.File) map[*ast.CallExpr]struct{} {
 	res := make(map[*ast.CallExpr]struct{})
 
-	var ces []*ast.CallExpr // nolint: prealloc
+	var ces []*ast.CallExpr //nolint:prealloc
 
 	for _, d := range f.Decls {
 		ces = append(ces, enumerateDeclVars(d)...)

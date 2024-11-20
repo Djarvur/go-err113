@@ -9,7 +9,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-func inspectComparision(pass *analysis.Pass, n ast.Node) bool { // nolint: unparam
+func inspectComparision(pass *analysis.Pass, n ast.Node) bool { //nolint:unparam
 	// check whether the call expression matches time.Now().Sub()
 	be, ok := n.(*ast.BinaryExpr)
 	if !ok {
