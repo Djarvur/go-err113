@@ -26,13 +26,13 @@ func run(pass *analysis.Pass) (any, error) {
 		ast.Inspect(
 			file,
 			func(n ast.Node) bool {
-				return inspectComparision(file, pass, n) &&
+				return inspectComparison(file, pass, n) &&
 					inspectDefinition(pass, tlds, n)
 			},
 		)
 	}
 
-	return nil, nil
+	return nil, nil //nolint:nilnil
 }
 
 // render returns the pretty-print of the given node.
@@ -48,7 +48,7 @@ func render(fset *token.FileSet, x any) string {
 func enumerateFileDecls(f *ast.File) map[*ast.CallExpr]struct{} {
 	res := make(map[*ast.CallExpr]struct{})
 
-	var ces []*ast.CallExpr // nolint: prealloc
+	var ces []*ast.CallExpr
 
 	for _, d := range f.Decls {
 		ces = append(ces, enumerateDeclVars(d)...)

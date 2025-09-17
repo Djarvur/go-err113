@@ -10,7 +10,7 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
-func inspectComparision(file *ast.File, pass *analysis.Pass, n ast.Node) bool { // nolint: unparam
+func inspectComparison(file *ast.File, pass *analysis.Pass, n ast.Node) bool { //nolint:unparam
 	// check whether the call expression matches time.Now().Sub()
 	be, ok := n.(*ast.BinaryExpr)
 	if !ok {
@@ -27,9 +27,10 @@ func inspectComparision(file *ast.File, pass *analysis.Pass, n ast.Node) bool { 
 	}
 
 	root := inspector.New([]*ast.File{file}).Root()
+
 	c, ok := root.FindNode(n)
 	if !ok {
-		panic(fmt.Errorf("could not find node %T in inspector for file %q", n, file.Name.Name))
+		panic(fmt.Sprintf("could not find node %T in inspector for file %q", n, file.Name.Name))
 	}
 
 	for cur := c.Parent(); cur != root; cur = cur.Parent() {
@@ -69,7 +70,7 @@ func inspectComparision(file *ast.File, pass *analysis.Pass, n ast.Node) bool { 
 	return true
 }
 
-var errorType = types.Universe.Lookup("error").Type().Underlying().(*types.Interface)
+var errorType = types.Universe.Lookup("error").Type().Underlying().(*types.Interface) //nolint:forcetypeassert,gochecknoglobals
 
 func isMethodNamed(cur inspector.Cursor, pass *analysis.Pass, name string) bool {
 	funcNode, ok := cur.Node().(*ast.FuncDecl)
@@ -83,6 +84,7 @@ func isMethodNamed(cur inspector.Cursor, pass *analysis.Pass, name string) bool 
 	}
 
 	typ := pass.TypesInfo.Types[funcNode.Recv.List[0].Type]
+
 	return typ.Type != nil && types.Implements(typ.Type, errorType)
 }
 
@@ -149,5 +151,6 @@ func rawString(x ast.Expr) string {
 	case *ast.CallExpr:
 		return fmt.Sprintf("%s()", rawString(t.Fun))
 	}
+
 	return fmt.Sprintf("%s", x)
 }
