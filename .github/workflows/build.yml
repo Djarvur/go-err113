@@ -1,0 +1,47 @@
+name: build, tests, lint
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        go-version: [ oldstable, stable ]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    name: Run tests
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Build
+        run: go build -v -ldflags "-s -w" -trimpath ./cmd/err113/
+
+      - name: Tests
+        run: |
+          go test -count=1 -cover -coverprofile=coverage.out ./...
+          go tool cover -func=coverage.out
+
+  golangci-lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+      - name: run golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
