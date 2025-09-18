@@ -8,7 +8,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-var methods2check = map[string]map[string]func(*ast.CallExpr, *types.Info) bool{ // nolint: gochecknoglobals
+var methods2check = map[string]map[string]func(*ast.CallExpr, *types.Info) bool{ //nolint:gochecknoglobals
 	"errors": {"New": justTrue},
 	"fmt":    {"Errorf": checkWrap},
 }
@@ -21,7 +21,7 @@ func checkWrap(ce *ast.CallExpr, info *types.Info) bool {
 	return !(len(ce.Args) > 0 && strings.Contains(toString(ce.Args[0], info), `%w`))
 }
 
-func inspectDefinition(pass *analysis.Pass, tlds map[*ast.CallExpr]struct{}, n ast.Node) bool { //nolint: unparam
+func inspectDefinition(pass *analysis.Pass, tlds map[*ast.CallExpr]struct{}, n ast.Node) bool { //nolint:unparam
 	// check whether the call expression matches time.Now().Sub()
 	ce, ok := n.(*ast.CallExpr)
 	if !ok {

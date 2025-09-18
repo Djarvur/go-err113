@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/Djarvur/go-err113"
 	"golang.org/x/tools/go/analysis/singlechecker"
+
+	"github.com/Djarvur/go-err113"
 )
 
 func main() {
