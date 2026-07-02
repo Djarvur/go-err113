@@ -59,3 +59,11 @@ type simpleType struct{ field string }
 func (s simpleType) Is(err error) bool {
 	return err == ErrWellDefined1 // want `do not compare errors directly \"err == ErrWellDefined1\", use \"errors\.Is\(err, ErrWellDefined1\)\" instead`
 }
+
+func ConvertError(err error) error {
+	return err
+}
+
+func ConvertErrorEqual(ce1, ce2 *CustomError) bool {
+	return ConvertError(ce1) != ce2 // want `do not compare errors directly \"ConvertError\(ce1\) != ce2\", use \"!errors.Is\(ConvertError\(ce1\), ce2\)\" instead`
+}

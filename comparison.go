@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"strings"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/ast/inspector"
@@ -149,7 +150,11 @@ func rawString(x ast.Expr) string {
 	case *ast.SelectorExpr:
 		return fmt.Sprintf("%s.%s", rawString(t.X), t.Sel.Name)
 	case *ast.CallExpr:
-		return fmt.Sprintf("%s()", rawString(t.Fun))
+		args := make([]string, len(t.Args))
+		for i, arg := range t.Args {
+			args[i] = rawString(arg)
+		}
+		return fmt.Sprintf("%s(%s)", rawString(t.Fun), strings.Join(args, ", "))
 	}
 
 	return fmt.Sprintf("%s", x)
